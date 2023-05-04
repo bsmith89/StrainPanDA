@@ -60,7 +60,7 @@ if(length(pangenome.file) == 0){
 
 profile <- read.csv(counts.file, row.names=1)
 
-profile.preprocessed <- preprocess(profile, pangenome.file = pangenome.file)	
+profile.preprocessed <- preprocess(profile, pangenome.file = pangenome.file, min.cov=0.001)
 
 if(ncol(profile.preprocessed$data)<5){
   message("Less than 5 samples left after preprocessing...\n")
