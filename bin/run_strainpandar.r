@@ -58,16 +58,23 @@ if(length(pangenome.file) == 0){
   stop("Cannot locate pangenome file...")
 }
 
-profile <- read.csv(counts.file, row.names=1)
 
+print("START: reading profile")
+profile <- read.csv(counts.file, row.names=1)
+print("END: reading profile")
+
+print("START: preprocess")
 profile.preprocessed <- preprocess(profile, pangenome.file = pangenome.file)	
+print("END: preprocess")
 
 if(ncol(profile.preprocessed$data)<5){
   message("Less than 5 samples left after preprocessing...\n")
   q(save="no", status=55)
 }
 
+print("START: decompose")
 res <- strain.decompose(profile.preprocessed, ncpu=ncpu, rank=rank, max.strain=max.rank)
+print("END: decompose")
 
 ## strain-sample plot
 write.table(res$S, file = paste0(output, ".strain_sample.csv"), sep=",",
