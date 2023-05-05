@@ -86,12 +86,15 @@ if(length(pangenome.file) == 0){
   stop("Cannot locate pangenome file...")
 }
 
+
 if ( !do.extras )  {
     message("Plots and other extras will be suppressed.")
 }
 
+message("Reading counts.")
 profile <- read.csv(counts.file, row.names=1)
 
+message("Preprocessing counts and pangenome reference.")
 profile.preprocessed <- preprocess(profile, pangenome.file = pangenome.file, min.cov = min.cov, frac.gene = min.frac)
 
 if(ncol(profile.preprocessed$data) < min.samples){
@@ -99,11 +102,14 @@ if(ncol(profile.preprocessed$data) < min.samples){
   q(save="no", status=55)
 }
 
+message("Factorizing.")
 res <- strain.decompose(profile.preprocessed, ncpu=ncpu, rank=rank, max.strain=max.rank)
 
+message("Write sample-by-strain table.")
 write.table(res$S, file = paste0(output, ".strain_sample.csv"), sep=",",
             quote=F, row.names = TRUE, col.names = TRUE)
 
+message("Writing strain-by-gene table.")
 refs <- profile.preprocessed$reference
 
 p.filtered <- res$P[, colSums(res$P)!=0]
@@ -116,6 +122,7 @@ write.table(heatmap, file = paste0(output, ".genefamily_strain.csv"), sep=",",
 
 if ( do.extras ) {
     ## strain-sample plot
+    message("START: strain_sample plot")
     p <- melt(res$S) %>%
     ggplot(aes(x=Var2, y=value, fill=Var1)) +
     geom_bar(stat="identity") +
@@ -123,12 +130,16 @@ if ( do.extras ) {
     theme(axis.text.x = element_text(angle=90, hjust=1, vjust=0.5),
             legend.title = element_blank())
     ggsave(p, filename = paste0(output, ".strain_sample.pdf"), height = 10, width = 10)
+    message("END: strain_sample plot")
 
     ## gene family-strain plot
+    message("START: genefamily_strain plot")
     if( nrow(heatmap) < 60000 ){
         pheatmap((heatmap>0)*1,filename = paste0(output, ".genefamily_strain.pdf"), show_rownames = FALSE, fontsize = 5)
     }
+    message("END: genefamily_strain plot")
 
+    message("START: KO Profile")
     if(ko.profile) {
         ko.map <- list.files(pangenome.path, "*genefamily_knumber.txt", full.names = TRUE)
         if(length(ko.map)==0){
@@ -145,9 +156,13 @@ if ( do.extras ) {
     }else{
         write.table(NULL, paste0(output, ".strain.dummy.ko.txt"), quote=F, row.names = F, col.names = F)
     }
+    message("END: KO Profile")
 
+    message("START: saving RDS")
     saveRDS(res, paste0(output, ".rds"))
+    message("END: saving RDS")
 
+    message("START: neighbors")
     #find neighbors
     #rm extra strings in the colnames
     name_list <- colnames(res$S)
@@ -163,6 +178,7 @@ if ( do.extras ) {
 
     #library(tidyverse)
     ## True genome profie
+    message("START: pangenome")
     pangenome <- read.table(pangenome.file, head = F) %>% dplyr::select(1,3) %>% distinct() %>%  mutate(presence=1) %>%
     dcast(V1~V3) %>%
     data.frame(row.names = 1)
@@ -212,6 +228,7 @@ if ( do.extras ) {
             m_out_anno <- m_out[names(neighbor_str[!duplicated(neighbor_str)]),]
             for(dup_n in 1:length(rn_m_dup)){
                 dup_i <- names(which(neighbor_str[!duplicated(neighbor_str)]==rn_m_dup[dup_n]))
+                message(names(rn_m_dup[dup_n]))
                 m_out_anno[dup_i,] <- m_out_anno[dup_i,]+m_out[names(rn_m_dup[dup_n]),]
             }
         } else{
@@ -224,6 +241,8 @@ if ( do.extras ) {
     write.table(m_out_anno, file=(paste(output,"_str_merged_prof.csv",sep="")),sep=",", quote=F, row.names= TRUE, col.names= TRUE, fileEncoding="UTF-8" )
     rownames(m_out_anno) <- neighbor_str[!duplicated(neighbor_str)]
     write.table(m_out_anno, file=(paste(output,"_str_anno_prof.csv",sep="")),sep=",", quote=F, row.names= TRUE, col.names= TRUE, fileEncoding="UTF-8" )
+    message("END: pangenome")
+    message("START: anno_strain_sample plot")
     p <- melt(m_out_anno) %>%
     ggplot(aes(x=Var2, y=value, fill=Var1)) +
     geom_bar(stat="identity") +
@@ -231,4 +250,5 @@ if ( do.extras ) {
     theme(axis.text.x = element_text(angle=90, hjust=1, vjust=0.5),
             legend.title = element_blank())
     ggsave(p, filename = paste0(output, ".anno_strain_sample.pdf"), height = 10, width = 10)
+    message("END: anno_strain_sample plot")
 }
