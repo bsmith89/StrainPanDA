@@ -23,16 +23,19 @@ if ( !is.null(opt$help) ) {
     cat(getopt(spec, usage=TRUE));
     q(status=1);
 }
-if ( is.null(opt$counts   ) ) {
+
+if ( is.null(opt$counts ) ) {
     cat("Missing input count matrix file. Specify with `-c/--counts`.\n")
-    q(status=1) }
+    q(status=1)
+}
 if ( is.null(opt$reference) ) {
     cat("Missing input reference path. Specify with `-r/--reference`.\n")
-    q(status=1) }
-if ( is.null(opt$output   ) ) { opt$output = './strainpandar' }
-if ( is.null(opt$threads  ) ) { opt$threads = 1 }
-if ( is.null(opt$max_rank ) ) { opt$max_rank = 8 }
-if ( is.null(opt$rank     ) ) { opt$rank = 0 }
+    q(status=1)
+}
+if ( is.null(opt$output           ) ) { opt$output = './strainpandar' }
+if ( is.null(opt$threads          ) ) { opt$threads = 1 }
+if ( is.null(opt$max_rank         ) ) { opt$max_rank = 8 }
+if ( is.null(opt$rank             ) ) { opt$rank = 0 }
 if ( is.null(opt$mincov           ) ) { opt$mincov = 10 }
 if ( is.null(opt$minfrac          ) ) { opt$minfrac = 0.9 }
 if ( is.null(opt$minsamples       ) ) { opt$minsamples = 5 }
