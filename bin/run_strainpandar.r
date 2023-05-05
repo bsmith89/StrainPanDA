@@ -2,15 +2,16 @@
 
 ## getopt
 library(getopt)
-spec <- matrix(c(
-    'help','h',0,'logical','Show this help message',
-    'counts', 'c', 1, 'character', 'Gene-sample count matrix (CSV file) obtained from mapping reads to a reference pangenome [required]',
-    'reference', 'r', 1, 'character', 'Pangenome database path [required]',
-    'output', 'o', 2, 'character', 'Output prefix [default: ./strainpandar]',
-    'threads', 't', 2, 'integer', 'Number of threads to run in parallele [default: 1]',
-    'max_rank', 'm', 2, 'integer', 'Max number of strains expected [default: 8]',
-    'rank', 'n', 2, 'integer', 'Number of strains expected. If 0, try to select from 1 to `max_rank`. If not 0, overwrite `max_rank`. [default: 0]'
-    ), byrow=T, ncol=5)
+spec <- matrix(
+    c( 'help', 'h', 0, 'logical', 'Show this help message'
+     , 'counts', 'c', 1, 'character', 'Gene-sample count matrix (CSV file) obtained from mapping reads to a reference pangenome [required]'
+     , 'reference', 'r', 1, 'character', 'Pangenome database path [required]'
+     , 'output', 'o', 2, 'character', 'Output prefix [default: ./strainpandar]'
+     , 'threads', 't', 2, 'integer', 'Number of threads to run in parallele [default: 1]'
+     , 'max_rank', 'm', 2, 'integer', 'Max number of strains expected [default: 8]'
+     , 'rank', 'n', 2, 'integer', 'Number of strains expected. If 0, try to select from 1 to `max_rank`. If not 0, overwrite `max_rank`. [default: 0]'
+     , 'noextras', 'q', 0, 'logical', 'No plots or other extras in outputs. [default: do output plots]'
+     ), byrow=T, ncol=5)
 
 opt = getopt(spec)
 
@@ -30,6 +31,7 @@ if ( is.null(opt$output   ) ) { opt$output = './strainpandar' }
 if ( is.null(opt$threads  ) ) { opt$threads = 1 }
 if ( is.null(opt$max_rank ) ) { opt$max_rank = 8 }
 if ( is.null(opt$rank     ) ) { opt$rank = 0 }
+if ( is.null(opt$noextras         ) ) { opt$noextras = FALSE } else { opt$noextras = TRUE }
 
 counts.file <- opt$counts
 pangenome.path <- opt$reference
@@ -37,6 +39,7 @@ output <- opt$output
 ncpu <- opt$threads
 max.rank <- opt$max_rank
 rank <- opt$rank
+do.extras <- !opt$noextras
 
 ## libraries to load
 library(strainpandar)
