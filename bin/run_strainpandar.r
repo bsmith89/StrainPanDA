@@ -2,15 +2,18 @@
 
 ## getopt
 library(getopt)
-spec <- matrix(c(
-    'help','h',0,'logical','Show this help message',
-    'counts', 'c', 1, 'character', 'Gene-sample count matrix (CSV file) obtained from mapping reads to a reference pangenome [required]',
-    'reference', 'r', 1, 'character', 'Pangenome database path [required]',
-    'output', 'o', 2, 'character', 'Output prefix [default: ./strainpandar]',
-    'threads', 't', 2, 'integer', 'Number of threads to run in parallele [default: 1]',
-    'max_rank', 'm', 2, 'integer', 'Max number of strains expected [default: 8]',
-    'rank', 'n', 2, 'integer', 'Number of strains expected. If 0, try to select from 1 to `max_rank`. If not 0, overwrite `max_rank`. [default: 0]'
-    ), byrow=T, ncol=5)
+spec <- matrix(
+    c( 'help', 'h', 0, 'logical', 'Show this help message'
+     , 'counts', 'c', 1, 'character', 'Gene-sample count matrix (CSV file) obtained from mapping reads to a reference pangenome [required]'
+     , 'reference', 'r', 1, 'character', 'Pangenome database path [required]'
+     , 'output', 'o', 2, 'character', 'Output prefix [default: ./strainpandar]'
+     , 'threads', 't', 2, 'integer', 'Number of threads to run in parallele [default: 1]'
+     , 'max_rank', 'm', 2, 'integer', 'Max number of strains expected [default: 8]'
+     , 'rank', 'n', 2, 'integer', 'Number of strains expected. If 0, try to select from 1 to `max_rank`. If not 0, overwrite `max_rank`. [default: 0]'
+     , 'mincov', 'd', 2, 'double', 'Minimum depth of genes to be counted as "present" (TODO: Understand how this coverage is calculated); [default: 1]'
+     , 'minfrac', 'f', 2, 'double', 'Minimum fraction of genes "present"; otherwise reject the sample.'
+     , 'minsamples', 's', 2, 'integer', 'Fail if fewer than this many samples after filtering. [default: 5]'
+     ), byrow=T, ncol=5)
 
 opt = getopt(spec)
 
@@ -30,6 +33,9 @@ if ( is.null(opt$output   ) ) { opt$output = './strainpandar' }
 if ( is.null(opt$threads  ) ) { opt$threads = 1 }
 if ( is.null(opt$max_rank ) ) { opt$max_rank = 8 }
 if ( is.null(opt$rank     ) ) { opt$rank = 0 }
+if ( is.null(opt$mincov           ) ) { opt$mincov = 10 }
+if ( is.null(opt$minfrac          ) ) { opt$minfrac = 0.9 }
+if ( is.null(opt$minsamples       ) ) { opt$minsamples = 5 }
 
 counts.file <- opt$counts
 pangenome.path <- opt$reference
@@ -37,6 +43,9 @@ output <- opt$output
 ncpu <- opt$threads
 max.rank <- opt$max_rank
 rank <- opt$rank
+min.cov <- opt$mincov
+min.frac <- opt$minfrac
+min.samples <- opt$minsamples
 
 ## libraries to load
 library(strainpandar)
@@ -60,10 +69,10 @@ if(length(pangenome.file) == 0){
 
 profile <- read.csv(counts.file, row.names=1)
 
-profile.preprocessed <- preprocess(profile, pangenome.file = pangenome.file, min.cov=0.001)
+profile.preprocessed <- preprocess(profile, pangenome.file = pangenome.file, min.cov = min.cov, frac.gene = min.frac)
 
-if(ncol(profile.preprocessed$data)<5){
-  message("Less than 5 samples left after preprocessing...\n")
+if(ncol(profile.preprocessed$data) < min.samples){
+  message("Fewer than ", min.samples, " samples left after preprocessing...\n")
   q(save="no", status=55)
 }
 
