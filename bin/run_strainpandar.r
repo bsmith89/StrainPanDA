@@ -18,6 +18,7 @@ spec <- matrix(
      , 'threads', 't', 2, 'integer', 'Number of threads to run in parallele [default: 1]'
      , 'max_rank', 'm', 2, 'integer', 'Max number of strains expected [default: 8]'
      , 'rank', 'n', 2, 'integer', 'Number of strains expected. If 0, try to select from 1 to `max_rank`. If not 0, overwrite `max_rank`. [default: 0]'
+     , 'libstrainpandar', 'p', 2, 'character', 'Path to strainpandar source code for devtools::load_all(path). [default to library(strainpandar) instead]'
      ), byrow=T, ncol=5)
 
 opt = getopt(spec)
@@ -27,6 +28,11 @@ if ( !is.null(opt$help) ) {
     cat(usage_message)
     cat(getopt(spec, usage=TRUE));
     q(status=1);
+}
+if ( is.null(opt$libstrainpandar) ) {
+    library("strainpandar")
+} else {
+    devtools::load_all(opt$libstrainpandar)
 }
 if ( is.null(opt$counts   ) ) {
     cat("Missing input count matrix file. Specify with `-c/--counts`.\n")
