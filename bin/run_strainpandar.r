@@ -66,13 +66,6 @@ min.frac <- opt$minfrac
 min.samples <- opt$minsamples
 do.extras <- !opt$noextras
 
-## libraries to load
-library(strainpandar)
-library(ggplot2)
-library(reshape2)
-library(pheatmap)
-library(dplyr)
-
 ## if 0, run from 1:8, otherwise run with specified rank
 if (rank == 0) {
   rank <- NULL
