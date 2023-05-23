@@ -71,24 +71,27 @@ if (rank == 0) {
   rank <- NULL
 }
 
+if ( !do.extras )  {
+    message("Plots and other extras will be suppressed.")
+}
+
+
 ko.profile <- FALSE
 
 pangenome.file <- list.files(pangenome.path, "*pangenome.csv", full.names = TRUE)
+message("Reading pangenome reference from ", pangenome.file)
 
 if(length(pangenome.file) == 0){
   stop("Cannot locate pangenome file...")
 }
 
-
-if ( !do.extras )  {
-    message("Plots and other extras will be suppressed.")
-}
-
-message("Reading counts.")
+message("Reading counts from ", counts.file)
 profile <- read.csv(counts.file, row.names=1)
 
 message("Preprocessing counts and pangenome reference.")
-profile.preprocessed <- preprocess(profile, pangenome.file = pangenome.file, min.cov = min.cov, frac.gene = min.frac)
+profile.preprocessed <- preprocess(
+    profile, pangenome.file = pangenome.file, min.cov = min.cov, frac.gene = min.frac
+)
 
 if(ncol(profile.preprocessed$data) < min.samples){
   message("Fewer than ", min.samples, " samples left after preprocessing...\n")
