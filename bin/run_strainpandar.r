@@ -21,6 +21,7 @@ spec <- matrix(
      , 'libstrainpandar', 'p', 2, 'character', 'Path to strainpandar source code for devtools::load_all(path). [default to library(strainpandar) instead]'
      , 'mincov', 'd', 2, 'double', 'Minimum depth of genes to be counted as "present" (TODO: Understand how this coverage is calculated); [default: 1]'
      , 'minfrac', 'f', 2, 'double', 'Minimum fraction of genes "present"; otherwise reject the sample.'
+     , 'minreads', 'e', 2, 'double', 'Minimum total number of reads hitting genes for a sample to be kept.'
      , 'minsamples', 's', 2, 'integer', 'Fail if fewer than this many samples after filtering. [default: 5]'
      , 'noextras', 'q', 0, 'logical', 'No plots or other extras in outputs. [default: do output plots]'
      ), byrow=T, ncol=5)
@@ -63,6 +64,7 @@ max.rank <- opt$max_rank
 rank <- opt$rank
 min.cov <- opt$mincov
 min.frac <- opt$minfrac
+min.reads <- opt$minreads
 min.samples <- opt$minsamples
 do.extras <- !opt$noextras
 
@@ -90,7 +92,7 @@ profile <- read.csv(counts.file, row.names=1)
 
 message("Preprocessing counts and pangenome reference.")
 profile.preprocessed <- preprocess(
-    profile, pangenome.file = pangenome.file, min.cov = min.cov, frac.gene = min.frac
+    profile, pangenome.file = pangenome.file, min.cov = min.cov, frac.gene = min.frac, min.reads = min.reads
 )
 
 if(ncol(profile.preprocessed$data) < min.samples){

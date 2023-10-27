@@ -10,8 +10,9 @@
 ##' @author Xbiome
 ##' @description filter input data
 ##' @export
-preprocess <- function(count.matrix, pangenome.file, min.cov=10, frac.gene=0.9, scaling=1e9){
+preprocess <- function(count.matrix, pangenome.file, min.cov=10, frac.gene=0.9, scaling=1e9, min.reads=10e6){
   ## normalize counts
+    message("`preprocess` called with pangenome_path: ", pangenome.file, ", min.cov: ", min.cov, ", frac_gene: ", frac.gene, ", scaling: ", scaling, ", min.reads: ", min.reads)
   mat <- apply(count.matrix/100, 2, function(x) x/sum(x)) * scaling
   gene.family.number <- NULL
   ## collapse to gene families
@@ -42,7 +43,7 @@ preprocess <- function(count.matrix, pangenome.file, min.cov=10, frac.gene=0.9, 
   mat[mat>300] <- 300  ## cap the data at a max value
   ## 2. filter low coverage sample
   sample.keep <- colSums(mat>0) >= min.gf * frac.gene  &
-    colSums(count.matrix) > 10e6
+    colSums(count.matrix) > min.reads
   # message(sprintf("Sample(s) filtered for the species: %s\n", names(which(!sample.keep))))
   mat <- mat[,sample.keep, drop=FALSE]
   mat <- mat[rowSums(mat)>0, ] ## remove genes with 0 reads for now
